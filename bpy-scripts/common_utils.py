@@ -12,13 +12,14 @@ def reset_scene():
     for c in bpy.data.collections:
         if c.name != 'Collection':
             bpy.data.collections.remove(c)
-    # Set render engine (compatible with Blender 4.x)
-    if 'BLENDER_EEVEE_NEXT' in bpy.types.Scene.bl_rna.properties['render'].properties['engine'].enum_items:
+    # Set render engine (try EEVEE_NEXT first for Blender 4.x, fallback to older versions)
+    try:
         bpy.context.scene.render.engine = 'BLENDER_EEVEE_NEXT'
-    elif 'BLENDER_EEVEE' in bpy.types.Scene.bl_rna.properties['render'].properties['engine'].enum_items:
-        bpy.context.scene.render.engine = 'BLENDER_EEVEE'
-    else:
-        bpy.context.scene.render.engine = 'CYCLES'
+    except TypeError:
+        try:
+            bpy.context.scene.render.engine = 'BLENDER_EEVEE'
+        except TypeError:
+            bpy.context.scene.render.engine = 'CYCLES'
 
 
 def set_units_metric(scale_length=1.0):
