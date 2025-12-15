@@ -1,6 +1,7 @@
 # Obor Penjaga procedural placeholder
 # Run inside Blender
 import bpy
+import math
 # Try to import helpers; fallback to loading from Blender Text Editor
 try:
     from common_utils import reset_scene, set_units_metric, make_material, assign_material, add_empty_at, export_fbx
@@ -12,71 +13,65 @@ except ModuleNotFoundError:
 
 
 def build_obor():
-    # Traditional Indonesian torch with ornate base
-    # Base platform (stone)
-    bpy.ops.mesh.primitive_cylinder_add(vertices=6, radius=0.5, depth=0.15, location=(0, 0, 0.075))
+    # Low-poly simple torch
+    # Base platform (hexagon, low-poly)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=6, radius=0.35, depth=0.12, location=(0, 0, 0.06))
     base = bpy.context.active_object
     
-    # Ornate pole segments
-    bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.09, depth=1.8, location=(0, 0, 1.0))
+    # Simple pole (octagon, low-poly)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=0.06, depth=1.6, location=(0, 0, 0.9))
     pole = bpy.context.active_object
     
-    # Decorative rings on pole
-    rings = []
-    for z in [0.5, 1.0, 1.5]:
-        bpy.ops.mesh.primitive_torus_add(major_radius=0.11, minor_radius=0.025, location=(0, 0, z))
-        ring = bpy.context.active_object
-        rings.append(ring)
+    # Single decorative ring (optional, low-poly)
+    bpy.ops.mesh.primitive_torus_add(major_segments=8, minor_segments=6, major_radius=0.08, minor_radius=0.02, location=(0, 0, 1.6))
+    ring = bpy.context.active_object
+    rings = [ring]
     
-    # Bowl/holder (traditional metal bowl)
-    bpy.ops.mesh.primitive_cone_add(vertices=64, radius1=0.4, radius2=0.08, depth=0.35, location=(0, 0, 1.95))
+    # Bowl (simple cone, low-poly)
+    bpy.ops.mesh.primitive_cone_add(vertices=8, radius1=0.25, radius2=0.08, depth=0.25, location=(0, 0, 1.82))
     bowl = bpy.context.active_object
-    bowl.rotation_euler[0] = pi
+    bowl.rotation_euler[0] = math.pi
     
-    # Inner bowl detail
-    bpy.ops.mesh.primitive_cylinder_add(vertices=32, radius=0.32, depth=0.08, location=(0, 0, 2.08))
-    bowl_inner = bpy.context.active_object
-    
-    # Flame (layered for realistic fire)
-    bpy.ops.mesh.primitive_cone_add(vertices=32, radius1=0.25, radius2=0.02, depth=0.6, location=(0, 0, 2.4))
+    # Flame (geometric stylized - 3 cones for low-poly flame look)
+    # Base flame (red-orange)
+    bpy.ops.mesh.primitive_cone_add(vertices=6, radius1=0.18, radius2=0.02, depth=0.45, location=(0, 0, 2.05))
     flame_base = bpy.context.active_object
-    flame_base.scale[0] = 1.2
-    flame_base.scale[1] = 0.9
+    flame_base.rotation_euler[2] = pi / 6  # slight rotation for style
     
-    bpy.ops.mesh.primitive_cone_add(vertices=24, radius1=0.18, radius2=0.01, depth=0.5, location=(0, 0, 2.5))
+    # Mid flame (orange-yellow)
+    bpy.ops.mesh.primitive_cone_add(vertices=5, radius1=0.12, radius2=0.01, depth=0.35, location=(0.05, 0.03, 2.15))
     flame_mid = bpy.context.active_object
-    flame_mid.scale[0] = 0.8
-    flame_mid.scale[1] = 1.1
+    flame_mid.rotation_euler[2] = -pi / 8
     
-    bpy.ops.mesh.primitive_cone_add(vertices=16, radius1=0.1, radius2=0.005, depth=0.35, location=(0, 0, 2.6))
+    # Top flame (yellow-white)
+    bpy.ops.mesh.primitive_cone_add(vertices=4, radius1=0.06, radius2=0.005, depth=0.22, location=(-0.03, -0.02, 2.28))
     flame_top = bpy.context.active_object
     
-    # Glow sphere for light effect
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=12, radius=0.35, location=(0, 0, 2.4))
+    # Glow sphere (smaller, low-poly)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=8, ring_count=6, radius=0.22, location=(0, 0, 2.1))
     glow = bpy.context.active_object
     
-    # Materials
-    mat_stone = make_material('OborStone', base_color=(0.25, 0.22, 0.2, 1), roughness=0.9)
-    mat_pole = make_material('OborWood', base_color=(0.12, 0.08, 0.05, 1), roughness=0.85)
-    mat_metal = make_material('OborMetal', base_color=(0.3, 0.25, 0.15, 1), metallic=0.6, roughness=0.4)
-    mat_flame_base = make_material('FlameBase', base_color=(1.0, 0.4, 0.05, 1), emission_strength=4.0, roughness=0.1)
-    mat_flame_mid = make_material('FlameMid', base_color=(1.0, 0.7, 0.1, 1), emission_strength=6.0, roughness=0.1)
-    mat_flame_top = make_material('FlameTop', base_color=(1.0, 0.9, 0.6, 1), emission_strength=8.0, roughness=0.05)
-    mat_glow = make_material('FlameGlow', base_color=(1.0, 0.6, 0.2, 1), emission_strength=3.5, roughness=0.0)
+    # Materials (low-poly style - flatter, less glossy)
+    mat_stone = make_material('OborStone', base_color=(0.3, 0.28, 0.25, 1), roughness=1.0)
+    mat_pole = make_material('OborWood', base_color=(0.25, 0.15, 0.08, 1), roughness=0.95)
+    mat_metal = make_material('OborMetal', base_color=(0.4, 0.35, 0.25, 1), metallic=0.3, roughness=0.7)
+    mat_flame_base = make_material('FlameRed', base_color=(1.0, 0.25, 0.05, 1), emission_strength=3.0, roughness=0.3)
+    mat_flame_mid = make_material('FlameOrange', base_color=(1.0, 0.6, 0.1, 1), emission_strength=4.5, roughness=0.2)
+    mat_flame_top = make_material('FlameYellow', base_color=(1.0, 0.95, 0.5, 1), emission_strength=6.0, roughness=0.1)
+    mat_glow = make_material('FlameGlow', base_color=(1.0, 0.5, 0.15, 1), emission_strength=2.5, roughness=0.0)
     
     assign_material(base, mat_stone)
     assign_material(pole, mat_pole)
     for ring in rings:
         assign_material(ring, mat_metal)
     assign_material(bowl, mat_metal)
-    assign_material(bowl_inner, mat_metal)
     assign_material(flame_base, mat_flame_base)
     assign_material(flame_mid, mat_flame_mid)
     assign_material(flame_top, mat_flame_top)
     assign_material(glow, mat_glow)
     
     root = add_empty_at('OborRoot', (0, 0, 0))
-    for o in [base, pole] + rings + [bowl, bowl_inner, flame_base, flame_mid, flame_top, glow]:
+    for o in [base, pole] + rings + [bowl, flame_base, flame_mid, flame_top, glow]:
         o.parent = root
     return root
 
